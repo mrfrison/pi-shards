@@ -3,7 +3,7 @@ Uncertainty, supply-chain reorganisation, and the sensitivity of inflation
 
 ## Structure
 
-'''
+``` 
 .
 ├── README.md
 └── Literature
@@ -16,7 +16,7 @@ Uncertainty, supply-chain reorganisation, and the sensitivity of inflation
     ├── QWXZ26.pdf                   # Qiu, Z., Wang, Y., Xu, L., & Zanetti, F. (2026). Monetary Policy in Open Economies with Production Networks.
     ├── R23.pdf                      # Rubbo, E. (2023). Networks, Phillips Curves, and Monetary Policy.
     └── R23_supplement.pdf           # Supplement of paper above
-'''
+```  
 
 
 
