@@ -1,0 +1,1322 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage[a4paper, left=1in, right=1in, top=1in, bottom=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+
+\usepackage{xcolor}
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{}
+
+\begin{document}
+
+\section{Model sketch: multi-sector New Keynesian economy with an endogenous production network}\label{model-sketch-an-endogenous-production-network-inside-a-multi-sector-new-keynesian-economy}
+
+This document builds the model from primitives. Every assumption is
+listed once (Section 1) with a label, every actor's problem is written
+and solved (Section 2), the flex-price equilibrium is derived exactly
+(Section 3), the network-choice block is derived from the firm's problem
+including a re-derivation of KMNT's Lemma 2 for monopolistic producers
+(Section 4), the sticky-price block is log-linearized step by step and
+mapped onto R23's objects (Section 5), inconsistencies and undesired
+effects are listed and mapped to the assumptions that cause them
+(Section 6), and a notation dictionary closes (Section 7). All
+derivations are in the main text.
+
+Conventions: lower-case letters are logs of the corresponding upper-case
+variables (\(p_i = \log P_i\)); vectors are column vectors indexed over
+sectors \(i = 0,1,\dots,N\); \(\mathbf{1}\) is the vector of ones;
+\(e_0\) is the first unit vector; \(\mathbb{E}_t\) is the expectation
+conditional on period-\(t\) information; a superscript \(nat\) denotes
+the flexible-price (``natural'') value; a tilde denotes a gap from
+natural. Sector \(0\) is the labor union.
+
+\subsection{0. Overview and timing}\label{overview-and-timing}
+
+There are three nested clocks.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Regime.} A regime is a belief pair \((\mu,\Sigma)\) describing
+  the stationary distribution of sectoral productivity. A fragmentation
+  shock is a once-and-for-all change of regime.
+\item
+  \textbf{Network.} At the start of a regime, each sector chooses its
+  input technique \(\Omega_i\) once, before any productivity is
+  realized, on the basis of \((\mu,\Sigma)\). The technique stays fixed
+  for the life of the regime.
+\item
+  \textbf{Period.} Every period \(t\), productivity \(\varepsilon_t\) is
+  realized, a fraction of producers reset prices (Calvo), the central
+  bank sets the nominal rate, and markets clear.
+\end{enumerate}
+
+The two blocks of the model correspond to clocks 2 and 3. Because the
+technique is evaluated under the flexible-price distribution (assumption
+I2 below), the network block is solved first and its output --- the
+input-output matrix \(\Omega^*\), the Domar weights \(\lambda^*\), the
+steady-state TFP levels \(a_i(\Omega_i^*)\) --- becomes the
+linearization point of the sticky-price block. The structure is
+recursive: no fixed point across blocks.
+
+\subsection{1. Assumptions}\label{assumptions}
+
+Each assumption carries a label used in Section 6 to trace consequences
+back to their source.
+
+\subsubsection{Environment}\label{environment}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{2cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\columnwidth-2cm-2\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Label
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Assumption
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{E1} & Discrete time \(t=0,1,2,\dots\), infinite horizon. Closed
+economy. No capital, no inventories, no government consumption. \\
+\textbf{E2} & Sectors \(i\in\{0,1,\dots,N\}\). Sector \(0\) is the labor
+union; sectors \(1,\dots,N\) produce goods. \\
+\textbf{E3} & Sectoral productivity
+\(\varepsilon_t = (\varepsilon_{1t},\dots,\varepsilon_{Nt})\) is a
+stationary Gaussian process with unconditional mean \(\mu\) and
+unconditional covariance \(\Sigma\); \(\varepsilon_{0t}\equiv 0\) (the
+union has no shock). Realized log TFP of sector \(i\) is
+\(\varepsilon_{it} + a_i(\Omega_i)\). Within a regime the deviation
+\(\log A_{it}\equiv\varepsilon_{it}-\mu_i\) follows
+\(\log A_t = \eta\log A_{t-1}+\xi_t\),
+\(\xi_t\sim N(0,(1-\eta^2)\Sigma)\), so that
+\(\mathbb{V}[\log A_t]=\Sigma\) unconditionally. \\
+\textbf{E4} & A fragmentation shock is a regime change
+\((\mu,\Sigma)\to(\mu',\Sigma')\) concentrated on foreign-labelled
+sectors. Shocks to access (tariffs, export controls) are wasteful wedges
+\(\log(1+\tau^w)\) on the buyer's cost; by KMNT App. L Prop. 13(2) they
+enter exactly as \(\varepsilon\) does, so they are folded into
+\(\varepsilon\). \\
+\end{longtable}
+
+\clearpage 
+
+\subsubsection{Preferences}\label{preferences}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{2cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\columnwidth-2cm-2\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Label
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Assumption
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{P1} & Representative household with period utility
+\(\dfrac{C_t^{1-\gamma}}{1-\gamma}-\dfrac{L_t^{1+\phi}}{1+\phi}\),
+discount factor \(\rho\in(0,1)\), \(\gamma>0\), \(\phi>0\). \\
+\textbf{P2} & Consumption aggregator is Cobb--Douglas,
+\(C_t=\prod_{i=1}^N (C_{it}/\beta_i)^{\beta_i}\), \(\sum_i\beta_i=1\),
+\(\beta_0=0\). \\
+\textbf{P3} & \(\gamma>1\). \\
+\textbf{P4} & Disutility depends on total hours \(L_t\) only, not on
+their distribution across labor types (pooling). \\
+\end{longtable}
+
+\subsubsection{Technology}\label{technology}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{2cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\columnwidth-2cm-2\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Label
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Assumption
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{T1} & Producer \(f\) in sector \(i\ge1\) has
+\(Y_{ift}=e^{\varepsilon_{it}+a_i(\Omega_i)}\,\zeta_i\prod_{j=0}^{N}X_{ifjt}^{\Omega_{ij}}\)
+with \(\sum_{j=0}^N\Omega_{ij}=1\) (constant returns),
+\(\zeta_i\equiv\prod_j\Omega_{ij}^{-\Omega_{ij}}\), where \(X_{if0t}\)
+is labor services bought from the union. \\
+\textbf{T2} & The technique-dependent TFP shifter is quadratic,
+\(a_i(\Omega_i)=\tfrac12(\Omega_i-\Omega_i^\circ)^\top H_i(\Omega_i-\Omega_i^\circ)\le0\),
+with \(H_i\) symmetric negative definite and ideal shares
+\(\Omega_i^\circ\) in the interior of the simplex. \\
+\textbf{T3} & One technique per sector, chosen once per regime and
+interior. All producers in a sector use the same technique in
+equilibrium. \\
+\textbf{T4} & The union (sector \(0\)) transforms raw household hours
+into labor services one-for-one: \(Y_{0ft}=L_{ft}\). It uses no
+intermediates (\(\Omega_{0j}=0\)). \\
+\end{longtable}
+
+\subsubsection{Market structure}\label{market-structure}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{2cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\columnwidth-2cm-2\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Label
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Assumption
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{M1} & Within each sector \(i\in\{0,\dots,N\}\) a continuum
+\(f\in[0,1]\) of monopolistically competitive producers sells
+differentiated varieties aggregated with CES elasticity \(\theta>1\),
+common across sectors. \\
+\textbf{M2} & Producers receive an input subsidy \(\tau\) on all
+purchases with \((1-\tau)\,\mathcal{M}=1\),
+\(\mathcal{M}\equiv\theta/(\theta-1)\), financed by a lump-sum tax on
+the household. Profits are rebated to the household. \\
+\textbf{M3} & Markets are complete: the household's marginal utility of
+nominal income is the state price used by all producers. \\
+\textbf{M4} & ``Foreign'' is a label. A foreign sector differs from a
+domestic one only in \((\mu_f,\Sigma_{ff})\) and in its covariances.
+Price rigidity is equal across foreign and domestic suppliers,
+\(\delta_F=\delta_D\). Foreign sectors buy labor services from the
+domestic union like any other sector. \\
+\end{longtable}
+
+\subsubsection{Nominal rigidity}\label{nominal-rigidity}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{2cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\columnwidth-2cm-2\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Label
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Assumption
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{N1} & Calvo pricing: in each period a producer in sector \(i\)
+(including union members, \(i=0\)) may reset its price with probability
+\(\delta_i\in(0,1)\), independently across producers and time. Sector
+\(0\)'s reset probability \(\delta_0\equiv\delta_L<1\) is wage rigidity.
+\\
+\textbf{N2} & The economy is log-linearized around the zero-inflation
+flexible-price steady state of the regime, at which every price equals
+marginal cost and the network is \(\Omega^*\). \\
+\end{longtable}
+
+\subsubsection{Information and timing}\label{information-and-timing}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{2cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\columnwidth-2cm-2\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Label
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Assumption
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{I1} & Techniques are chosen at the start of a regime, before any
+\(\varepsilon_t\) of the regime is observed, using the unconditional
+distribution \(N(\mu,\Sigma)\). \\
+\textbf{I2} & Frequency separation: when evaluating a technique,
+producers use the distribution of prices, quantities and the discount
+factor that would obtain under flexible prices. \\
+\textbf{I3} & All agents, including the central bank, observe
+\(\Omega^*\) and hence \(\lambda^*\). \\
+\end{longtable}
+
+\subsubsection{Policy}\label{policy}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{2cm}
+  >{\raggedright\arraybackslash}p{\dimexpr\columnwidth-2cm-2\tabcolsep\relax}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Label
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Assumption
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textbf{G1} & The central bank sets the nominal interest rate so that
+the output gap is zero every period, \(\tilde y_t=0\). (R23 Lemma 4
+shows this is implementable by a Taylor rule on the divine-coincidence
+index.) To be relaxed to a Taylor rule on CPI in a later exercise. \\
+\end{longtable}
+
+\subsection{2. Actors and their
+problems}\label{actors-and-their-problems}
+
+\subsubsection{2.1 Household}\label{household}
+
+The household chooses consumption \(\{C_{it}\}\), raw hours \(L_t\) and
+one-period nominal bonds \(B_t\) to maximize
+\[\mathbb{E}_0\sum_{t=0}^\infty\rho^t\left[\frac{C_t^{1-\gamma}}{1-\gamma}-\frac{L_t^{1+\phi}}{1+\phi}\right]\]
+subject to
+\[\sum_{i=1}^N P_{it}C_{it}+B_t\le W^h_tL_t+(1+i_{t-1})B_{t-1}+\Pi_t-T_t,\qquad C_t=\prod_{i=1}^N\left(\frac{C_{it}}{\beta_i}\right)^{\beta_i},\]
+where \(W^h_t\) is the price at which the household sells raw hours to
+the union, \(\Pi_t\) is aggregate profit (all sectors, including the
+union) and \(T_t\) the lump-sum tax.
+
+\textbf{Expenditure minimization.} Minimizing \(\sum_iP_{it}C_{it}\)
+subject to \(\prod_i(C_{it}/\beta_i)^{\beta_i}=1\) with multiplier
+\(\Lambda^C\) gives \(P_{it}=\Lambda^C\beta_i/C_{it}\), hence
+\(C_{it}=\Lambda^C\beta_i/P_{it}\). Substituting into the constraint,
+\(\prod_i(\Lambda^C/P_{it})^{\beta_i}=1\), so
+\(\Lambda^C=\prod_iP_{it}^{\beta_i}\equiv P^C_t\). Therefore
+\[C_{it}=\beta_i\frac{P^C_tC_t}{P_{it}},\qquad P^C_t=\prod_{i=1}^NP_{it}^{\beta_i},\qquad p^C_t=\beta^\top p_t. \tag{2.1}\]
+The CPI is an exact geometric average; no log-linearization is needed.
+
+\textbf{Labor supply.} The first-order condition for \(L_t\) with the
+multiplier on the budget constraint \(\Lambda_t\rho^t\) gives
+\(L_t^\phi=\Lambda_tW^h_t\), and the condition for \(C_t\) gives
+\(C_t^{-\gamma}=\Lambda_tP^C_t\). Combining,
+\[\frac{W^h_t}{P^C_t}=C_t^\gamma L_t^\phi\qquad\Longleftrightarrow\qquad w^h_t=p^C_t+\gamma c_t+\phi l_t. \tag{2.2}\]
+Under P4 there is a single marginal rate of substitution for all hours,
+whatever labor type they are supplied as.
+
+\textbf{Euler equation.} The condition for \(B_t\),
+\(\rho^t\Lambda_t=\rho^{t+1}(1+i_t)\mathbb{E}_t\Lambda_{t+1}\), with
+\(\Lambda_t=C_t^{-\gamma}/P^C_t\), is
+\[1=\rho(1+i_t)\,\mathbb{E}_t\left[\left(\frac{C_{t+1}}{C_t}\right)^{-\gamma}\frac{P^C_t}{P^C_{t+1}}\right]. \tag{2.3}\]
+
+\textbf{Stochastic discount factor.} The nominal state price for a
+period-\(t+s\) payoff, in units of period-\(t\) money, is
+\[\Lambda_{t,t+s}=\rho^s\left(\frac{C_{t+s}}{C_t}\right)^{-\gamma}\frac{P^C_t}{P^C_{t+s}}. \tag{2.4}\]
+By M3 this is what every producer uses.
+
+\subsubsection{\texorpdfstring{2.2 Producers in sectors
+\(i\ge1\)}{2.2 Producers in sectors i\textbackslash ge1}}\label{producers-in-sectors-ige1}
+
+Producer \(f\) in sector \(i\) solves three problems: an ex-post input
+choice every period, a Calvo price-reset problem whenever selected, and
+an ex-ante technique choice once per regime.
+
+\textbf{(a) Ex-post input choice.} Given technique \(\Omega_i\),
+realized TFP and input prices, minimize \(\sum_{j=0}^NP_{jt}X_{ifjt}\)
+subject to producing one unit. With multiplier \(\Lambda^X\), the
+first-order condition for input \(j\) is
+\(P_{jt}=\Lambda^X\Omega_{ij}/X_{ifjt}\) (using the constraint \(Y=1\)),
+i.e.~\(X_{ifjt}=\Lambda^X\Omega_{ij}/P_{jt}\). Substituting into the
+production constraint,
+\[e^{\varepsilon_{it}+a_i}\zeta_i\prod_j\left(\frac{\Lambda^X\Omega_{ij}}{P_{jt}}\right)^{\Omega_{ij}}=1\;\Longrightarrow\;\Lambda^X=\frac{\prod_jP_{jt}^{\Omega_{ij}}}{e^{\varepsilon_{it}+a_i}\zeta_i\prod_j\Omega_{ij}^{\Omega_{ij}}}=\frac{\prod_jP_{jt}^{\Omega_{ij}}}{e^{\varepsilon_{it}+a_i(\Omega_i)}},\]
+where the last step uses \(\zeta_i\prod_j\Omega_{ij}^{\Omega_{ij}}=1\).
+The multiplier is the pre-subsidy unit cost, common to all producers in
+the sector:
+\[MC_{it}=\frac{\prod_{j=0}^NP_{jt}^{\Omega_{ij}}}{e^{\varepsilon_{it}+a_i(\Omega_i)}},\qquad mc_{it}=\sum_{j=0}^N\Omega_{ij}p_{jt}-\varepsilon_{it}-a_i(\Omega_i), \tag{2.5}\]
+and conditional factor demands are
+\(X_{ifjt}=\Omega_{ij}MC_{it}Y_{ift}/P_{jt}\). Cost shares are constant
+and equal to \(\Omega_{ij}\) (T1, T4): this is the Cobb--Douglas
+property that makes (2.5) exactly log-linear in prices and productivity.
+With the subsidy (M2) the producer's effective marginal cost is
+\((1-\tau)MC_{it}=MC_{it}/\mathcal{M}\).
+
+\textbf{(b) Price setting.} Demand for variety \(f\) is
+\(Y_{ift}=(P_{ift}/P_{it})^{-\theta}Y_{it}\) with sectoral index
+\(P_{it}=\left(\int_0^1P_{ift}^{1-\theta}df\right)^{1/(1-\theta)}\). A
+producer selected to reset in \(t\) (probability \(\delta_i\)) chooses
+\(P^*_{it}\) to maximize the discounted value of profits over the
+horizon during which the price survives:
+\[\max_{P^*}\ \mathbb{E}_t\sum_{s=0}^\infty(1-\delta_i)^s\Lambda_{t,t+s}\left[P^*-\frac{MC_{i,t+s}}{\mathcal{M}}\right]\left(\frac{P^*}{P_{i,t+s}}\right)^{-\theta}Y_{i,t+s}.\]
+Differentiating with respect to \(P^*\) and dividing by
+\((1-\theta)(P^*)^{-\theta}\) gives:
+\[P^*_{it} \;=\; \frac{\mathbb{E}_t \displaystyle\sum_{s=0}^{\infty} (1-\delta_i)^s \, \Lambda_{t,t+s} \, P_{i,t+s}^{\theta} \, Y_{i,t+s} \, MC_{i,t+s}}
+{\mathbb{E}_t \displaystyle\sum_{s=0}^{\infty} (1-\delta_i)^s \, \Lambda_{t,t+s} \, P_{i,t+s}^{\theta} \, Y_{i,t+s}}  \tag{2.6}\]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \[\max_{P^*, \{\Omega_ij \}_{j=0}^N}\ \mathbb{E}_t\sum_{s=0}^\infty(1-\delta_i)^s\Lambda_{t,t+s}\left[P^*-\frac{MC_{i,t+s}}{\mathcal{M}}\right]\left(\frac{P^*}{P_{i,t+s}}\right)^{-\theta} e^{\varepsilon_{i, t+s}+a_i(\Omega_i)}\,\zeta_i\prod_{j=0}^{N}X_{ifj, t+s}^{\Omega_{ij}}.\]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \[\mathbb{E}_t\sum_{s=0}^\infty(1-\delta_i)^s\Lambda_{t,t+s}P_{i,t+s}^{\theta}Y_{i,t+s}\left[P^*-\mathcal{M}\frac{MC_{i,t+s}}{\mathcal{M}}\right]=0\;\Longrightarrow\;\mathbb{E}_t\sum_{s=0}^\infty(1-\delta_i)^s\Lambda_{t,t+s}P_{i,t+s}^{\theta}Y_{i,t+s}\left[P^*_{it}-MC_{i,t+s}\right]=0.\]
+The reset price is a weighted average of current and expected future
+\emph{pre-subsidy} marginal costs; the markup and the subsidy cancel
+exactly (M2). This is what makes the flexible-price limit
+(\(\delta_i\to1\)) efficient: \(P_{it}=MC_{it}\).
+
+By the law of large numbers across producers, the sectoral index evolves
+as
+\[P_{it}^{1-\theta}=(1-\delta_i)P_{i,t-1}^{1-\theta}+\delta_i(P^*_{it})^{1-\theta}. \tag{2.7}\]
+
+\textbf{(c) Technique choice.} At the start of the regime, producer
+\(f\) chooses
+\(\Omega_{if}\in\{\Omega\in\mathbb{R}^{N+1}_+:\mathbf{1}^\top\Omega=1\}\)
+to maximize the expected discounted value of its profit stream, taking
+as given the sectoral price \(P_{it}\), sectoral demand \(Y_{it}\) and
+the discount factor. Under I1--I2 this value is evaluated at the
+flexible-price distribution, in which the producer resets its price
+every period. Solved in Section 4.
+
+\subsubsection{\texorpdfstring{2.3 The union (sector
+\(0\))}{2.3 The union (sector 0)}}\label{the-union-sector-0}
+
+Union member \(f\) buys raw hours from the household at \(W^h_t\) and
+sells differentiated labor services at price \(W_{ft}\equiv P_{0ft}\).
+Firms' labor demand aggregates the varieties with the same CES
+elasticity \(\theta\), so
+\(W_t\equiv P_{0t}=\left(\int W_{ft}^{1-\theta}df\right)^{1/(1-\theta)}\)
+is the wage index paid by producers. Under T4 the union's marginal cost
+is \(MC_{0t}=W^h_t\), i.e.~\(mc_{0t}=w^h_t\), and by (2.2)
+\[mc_{0t}=p^C_t+\gamma c_t+\phi l_t. \tag{2.8}\] The union member's
+reset problem is (2.6) with \(i=0\) and reset probability
+\(\delta_0=\delta_L\). Sector \(0\) is therefore formally identical to
+any other sector: it has a Calvo Phillips curve, a subsidy that offsets
+its markup, and a marginal cost given by (2.8) instead of (2.5). In the
+notation of Section 5, sector \(0\) is the only sector with a nonzero
+direct labor share: \(\alpha\equiv e_0\), and all other sectors' labor
+shares appear in column \(0\) of \(\Omega\).
+
+\subsubsection{2.4 Government}\label{government}
+
+The government pays the subsidy \(\tau\sum_{i}\sum_jP_{jt}X_{ijt}\) and
+levies \(T_t\) on the household so that its budget balances period by
+period: \(T_t=\tau\sum_i\sum_jP_{jt}X_{ijt}\). It issues no debt.
+
+\subsubsection{2.5 Central bank}\label{central-bank}
+
+Under G1 the central bank chooses \(i_t\) such that
+\(\tilde y_t\equiv y_t-y^{nat}_t=0\) for all \(t\). Nothing else about
+the rule is needed in Section 5; R23 Lemma 4 supplies existence,
+uniqueness and an implementing Taylor rule. The Euler equation (2.3) is
+then needed only to back out \(i_t\).
+
+\subsubsection{2.6 Market clearing}\label{market-clearing}
+
+Goods: \(Y_{it}=C_{it}+\sum_{j=1}^N\int_0^1X_{jfit}\,df\) for \(i\ge1\).
+Labor services: \(Y_{0t}=\sum_{j=1}^N\int_0^1X_{jf0t}\,df\). Raw hours:
+\(L_t=\int_0^1Y_{0ft}\,df\). Bonds: \(B_t=0\).
+
+\subsubsection{2.7 Equilibrium}\label{equilibrium}
+
+Given a regime \((\mu,\Sigma)\), an equilibrium is a network
+\(\Omega^*\) and stochastic processes for prices, quantities and the
+interest rate such that (i) each producer's technique solves 2.2(c)
+given the flex-price distribution induced by \(\Omega^*\) and the other
+producers' techniques; (ii) each period, given \(\Omega^*\) and realized
+\(\varepsilon_t\), input choices solve 2.2(a), reset prices solve (2.6),
+sectoral indices follow (2.7), the household solves 2.1, the government
+budget balances, the central bank implements G1, and markets clear.
+Under I2 the equilibrium is computed recursively: Section 4 solves (i)
+using the exact flex-price equilibrium of Section 3, and Section 5
+solves (ii) to first order around it.
+
+\subsection{3. The flexible-price equilibrium at a given network
+(exact)}\label{the-flexible-price-equilibrium-at-a-given-network-exact}
+
+Fix a network \(\Omega\) and suppose every producer can reset its price
+every period (\(\delta_i=1\) for all \(i\)). Then (2.6) gives
+\(P_{it}=MC_{it}\) for all \(i\), including \(W_t=W^h_t\). Everything
+below holds exactly, not to first order, because of P2, T1, T4 and M2.
+Time subscripts are dropped; the period is static.
+
+\subsubsection{3.1 Prices}\label{prices}
+
+Write (2.5) and \(mc_0=w^h\) in vector form. Let \(\log A\) be the
+vector with entries \(\varepsilon_i+a_i(\Omega_i)\) for \(i\ge1\) and
+\(0\) for \(i=0\), and let \(\alpha\equiv e_0\). Then
+\[p=\Omega p+\alpha w^h-\log A .\] Row \(0\) of \(\Omega\) is zero (T4),
+so row \(0\) reads \(p_0=w=w^h\). The Leontief inverse
+\(L\equiv(I-\Omega)^{-1}\) exists because \(\Omega\) is substochastic
+with a zero row and every sector reaches sector \(0\) through a chain of
+positive shares. Hence \[p=L\alpha\,w^h-L\log A. \tag{3.1}\] Because
+each row of \(\Omega\) sums to \(1-\alpha_i\) (T1, T4),
+\((I-\Omega)\mathbf{1}=\alpha\), hence \(L\alpha=\mathbf{1}\), and (3.1)
+becomes \[p_i=w-\big[L\log A\big]_i\qquad\text{for all }i. \tag{3.2}\]
+Every price equals the wage minus the cumulated productivity of the
+sector's own supply chain. Prices in wage units are linear in \(\log A\)
+and therefore, given E3, Gaussian. This is KMNT Lemma 1 with the union
+as sector \(0\).
+
+\subsubsection{3.2 Sales, Domar weights and
+GDP}\label{sales-domar-weights-and-gdp}
+
+Sales of sector \(i\) equal final demand plus intermediate demand from
+all sectors. Using (2.1), the factor demands in 2.2(a), and
+\(MC_j=P_j\): \[P_iY_i=\beta_iP^CC+\sum_{j}\Omega_{ji}P_jY_j .\] In
+vector form with \(s_i\equiv P_iY_i\): \(s=\beta\,P^CC+\Omega^\top s\),
+so \(s^\top=\beta^\top L\,P^CC\). Define the \textbf{Domar weights}
+\[\lambda^\top\equiv\beta^\top L=\beta^\top(I-\Omega)^{-1},\qquad P_iY_i=\lambda_i\,P^CC. \tag{3.3}\]
+For the union, \(\lambda_0=\beta^\top L e_0\). Post-multiplying
+\(L\alpha=\mathbf{1}\) by \(\beta^\top\) gives
+\(\lambda^\top\alpha=\lambda_0=1\): union sales equal nominal GDP,
+\(WL=P^CC\). Nominal GDP is the wage bill; profits net of the subsidy
+are zero because \(P_i=MC_i\) and the subsidy is rebated (M2). Hence
+\[p^C=\beta^\top p=w-\lambda^\top\log A,\qquad c=w+l-p^C=l+\lambda^\top\log A. \tag{3.4}\]
+Define aggregate log TFP
+\[z\equiv\lambda^\top\log A=\sum_{i=1}^N\lambda_i\big(\varepsilon_i+a_i(\Omega_i)\big). \tag{3.5}\]
+Then \(c=l+z\) exactly: real GDP is aggregate TFP times hours. This is
+Hulten's theorem holding exactly (not just to first order) because all
+shares are constant.
+
+\subsubsection{3.3 Hours, output and the natural
+allocation}\label{hours-output-and-the-natural-allocation}
+
+Combine (3.4) with the labor supply condition (2.2),
+\(w^h-p^C=\gamma c+\phi l\), and \(w=w^h\): the real wage is
+\(w-p^C=z\), so \(z=\gamma c+\phi l=\gamma(l+z)+\phi l\), giving
+\[l^{nat}=\frac{1-\gamma}{\gamma+\phi}\,z,\qquad c^{nat}=y^{nat}=\frac{1+\phi}{\gamma+\phi}\,z. \tag{3.6}\]
+These are R23 Lemma 1 with \(\log A\) replaced by the exact TFP vector.
+Under P3 (\(\gamma>1\)) hours fall when productivity rises: the income
+effect dominates. The steady state of the regime is (3.2)--(3.6)
+evaluated at \(\log A=\mu+a(\Omega^*)\) (with \(\varepsilon_0=a_0=0\)),
+and the sticky-price block linearizes around it (N2).
+
+\subsection{4. The network block}\label{the-network-block}
+
+\subsubsection{4.1 What a producer
+maximizes}\label{what-a-producer-maximizes}
+
+Under I1--I2, producer \(f\) in sector \(i\) evaluates a candidate
+technique \(\Omega'_i\) by the expected discounted profit it would earn
+if it used \(\Omega'_i\) while resetting its price every period, in an
+economy where all other producers use the equilibrium network
+\(\Omega^*\). Two facts simplify this.
+
+First, a producer with pre-subsidy marginal cost \(MC'\) and a flexible
+price charges the markup \(\mathcal{M}\) over its effective marginal
+cost \(MC'/\mathcal{M}\), so \(P_f=MC'\). Its profit per period is
+\[\Pi_f=\left(P_f-\frac{MC'}{\mathcal{M}}\right)\left(\frac{P_f}{P_i}\right)^{-\theta}Y_i=\left(1-\frac1{\mathcal{M}}\right)MC'\left(\frac{MC'}{P_i}\right)^{-\theta}Y_i=\frac{1}{\theta}\left(\frac{MC'}{P_i}\right)^{1-\theta}P_iY_i . \tag{4.1}\]
+
+Second, by (3.3), \(P_iY_i=\lambda_iP^CC\) and the state price is
+\(\Lambda_t=\rho^tC_t^{-\gamma}/P^C_t\), so
+\[\Lambda_tP_{it}Y_{it}=\rho^t\lambda_iC_t^{1-\gamma}. \tag{4.2}\] The
+nominal-GDP scaling and the price level cancel: what remains is real
+consumption raised to \(1-\gamma\). Therefore the value of the technique
+is
+\[\mathcal{J}_i(\Omega'_i)=\frac{\lambda_i}{\theta}\sum_t\rho^t\,\mathbb{E}\left[C_t^{1-\gamma}\left(\frac{MC_{it}(\Omega'_i)}{P_{it}}\right)^{1-\theta}\right]. \tag{4.3}\]
+Under I1 every period has the same unconditional distribution, so the
+\(\rho^t\) sum is a constant multiple of a single-period expectation and
+can be dropped. Write the bracket in logs. From (2.5) and (3.6),
+\[\log\left[C^{1-\gamma}\left(\frac{MC_i(\Omega'_i)}{P_i}\right)^{1-\theta}\right]=(1-\gamma)c+(1-\theta)\Big[\Omega_i'^{\top}p-\varepsilon_i-a_i(\Omega'_i)-p_i\Big],\]
+which is Gaussian because \(c\) and \(p\) are linear in \(\varepsilon\)
+(Section 3). Define the log \textbf{effective discount factor}
+\[\tilde\lambda\equiv(1-\gamma)\,c^{nat}=-\Gamma z,\qquad\Gamma\equiv\frac{(\gamma-1)(1+\phi)}{\gamma+\phi}, \tag{4.4}\]
+using (3.6). Using
+\(\mathbb{E}[e^X]=\exp(\mathbb{E}X+\tfrac12\mathbb{V}X)\) for Gaussian
+\(X\), the log of the expectation in (4.3) is
+\[\log\mathcal{J}_i(\Omega'_i)=\text{const}+(1-\theta)\Big[\Omega_i'^{\top}\mathbb{E}p-a_i(\Omega'_i)\Big]+\tfrac12\mathbb{V}\Big[\tilde\lambda+(1-\theta)\big(\Omega_i'^{\top}p-\varepsilon_i-a_i(\Omega'_i)-p_i\big)\Big], \tag{4.5}\]
+where the constant collects terms that do not depend on \(\Omega'_i\),
+including \(\mathbb{E}[\tilde\lambda-(1-\theta)(\varepsilon_i+p_i)]\).
+
+\subsubsection{4.2 First-order condition and the risk-adjusted
+price}\label{first-order-condition-and-the-risk-adjusted-price}
+
+Differentiate (4.5) with respect to \(\Omega'_{ik}\). The deterministic
+part gives
+\((1-\theta)(\mathbb{E}p_k-\partial a_i/\partial\Omega_{ik})\). The
+variance part gives
+\(\tfrac12\cdot2\,\mathrm{Cov}\big[\tilde\lambda+(1-\theta)(\Omega_i'^{\top}p-\varepsilon_i-a_i-p_i),\,(1-\theta)p_k\big]\),
+since only \(p_k\) is stochastic in
+\(\partial(\cdot)/\partial\Omega'_{ik}\). Collecting and dividing
+through by \((1-\theta)\ne0\), with multiplier \(\nu_i\) on
+\(\mathbf{1}^\top\Omega'_i=1\):
+\[\mathbb{E}p_k-\frac{\partial a_i}{\partial\Omega_{ik}}+\mathrm{Cov}[\tilde\lambda,p_k]+(1-\theta)\,\mathrm{Cov}\big[\Omega_i'^{\top}p-\varepsilon_i-a_i(\Omega'_i)-p_i,\;p_k\big]-\nu_i=0. \tag{4.6}\]
+Now impose symmetry: in equilibrium \(\Omega'_i=\Omega^*_i\), so
+\(\Omega_i'^{\top}p-\varepsilon_i-a_i(\Omega'_i)=mc_i=p_i\) by (2.5) and
+Section 3. The last covariance in (4.6) is therefore
+\(\mathrm{Cov}[p_i-p_i,p_k]=0\) \textbf{at the equilibrium technique},
+and the condition collapses to
+\[\frac{\partial a_i(\Omega^*_i)}{\partial\Omega_{ik}}=R_k-\nu_i\quad\text{for all }k,\qquad R\equiv\mathbb{E}[p]+\mathrm{Cov}[p,\tilde\lambda]. \tag{4.7}\]
+\(R\) is the vector of \textbf{risk-adjusted prices}: the expected price
+plus its covariance with the household's effective marginal valuation.
+This is KMNT Lemma 2 with two changes. (i) The producer is a monopolist,
+not a price-taker; the CES structure adds the last term of (4.6), which
+vanishes only at the symmetric equilibrium, so (4.7) is a statement
+about the equilibrium first-order condition, not about the objective.
+(ii) The discount-factor weight is \(\Gamma\) instead of \(\gamma-1\),
+because elastic labor scales sales with \(C^{1-\gamma}\) rather than
+with \(C^{-\gamma}\) alone (equation (4.2)).
+
+Using (3.2) with \(w=0\) (wage numeraire) and (3.5),
+\[\mathbb{E}p=-L(\mu+a(\Omega^*)),\qquad\mathrm{Cov}[p,\tilde\lambda]=-\Gamma\,\mathrm{Cov}[-L\log A,\;\lambda^\top\log A]=\Gamma\,L\Sigma L^\top\beta, \tag{4.8}\]
+where \(\Sigma\) is padded with a zero row and column for sector \(0\)
+and \(\lambda=L^\top\beta\). So \(R_0=0\) and, for \(k\ge1\), \(R_k\) is
+the expected price of \(k\) in wage units plus \(\Gamma\) times the
+covariance of \(k\)'s price with aggregate TFP. A supplier whose price
+rises when the economy is poor (\(\mathrm{Cov}[p_k,z]<0\),
+i.e.~\([L\Sigma\lambda]_k>0\)) is penalized in proportion to \(\Gamma\).
+
+\subsubsection{4.3 Second-order condition}\label{second-order-condition}
+
+The Hessian of (4.5) with respect to \(\Omega'_i\) is
+\((1-\theta)(-H_i)+(1-\theta)^2\Sigma_p\), where
+\(\Sigma_p\equiv\mathbb{V}[p]=L\Sigma L^\top\). For a maximum it must be
+negative definite on the tangent space of the simplex; dividing by
+\(\theta-1>0\),
+\[H_i+(\theta-1)\,\Sigma_p\prec0\quad\text{on }\{v:\mathbf{1}^\top v=0\}. \tag{4.9}\]
+The second term is positive semidefinite: a monopolist's profit (4.1) is
+convex in its own cost, so cost variance \emph{raises} expected profit
+with strength \(\theta-1\). Condition (4.9) says the curvature of the
+TFP shifter must beat this convexity. KMNT's price-taking producer has
+objective Hessian \(-H_i+\Sigma_p\succ0\) for a minimum and needs no
+such condition.
+
+\subsubsection{4.4 Closed form under T2}\label{closed-form-under-t2}
+
+With quadratic \(a_i\),
+\(\partial a_i/\partial\Omega_i=H_i(\Omega_i-\Omega_i^\circ)\) and (4.7)
+reads \(H_i(\Omega^*_i-\Omega^\circ_i)=R-\nu_i\mathbf{1}\), so
+\(\Omega_i^*=\Omega_i^\circ+H_i^{-1}(R-\nu_i\mathbf{1})\). Imposing
+\(\mathbf{1}^\top\Omega_i^*=1=\mathbf{1}^\top\Omega_i^\circ\) gives
+\(\mathbf{1}^\top H_i^{-1}(R-\nu_i\mathbf{1})=0\), so
+\(\nu_i=\mathbf{1}^\top H_i^{-1}R/\mathbf{1}^\top H_i^{-1}\mathbf{1}\)
+and
+\[\Omega_i^*=\Omega_i^\circ+\hat H_i^{-1}R,\qquad\hat H_i^{-1}\equiv H_i^{-1}-\frac{H_i^{-1}\mathbf{1}\mathbf{1}^\top H_i^{-1}}{\mathbf{1}^\top H_i^{-1}\mathbf{1}}. \tag{4.10}\]
+\(\hat H_i^{-1}\) annihilates \(\mathbf{1}\), so only \emph{relative}
+risk-adjusted prices move the technique; adding a constant to \(R\)
+changes nothing, as it should under a numeraire choice. The equilibrium
+network is the fixed point
+\(\Omega^*=\Omega^\circ+\hat H^{-1}R(\Omega^*)\) with \(R(\Omega^*)\)
+from (4.8).
+
+\subsubsection{4.5 Planner equivalence and the risk
+weight}\label{planner-equivalence-and-the-risk-weight}
+
+The flex-price equilibrium is undistorted (M2, M3), so by the first
+welfare theorem the equilibrium network maximizes expected household
+utility. Using \(C=Z^{(1+\phi)/(\gamma+\phi)}\) and
+\(L=Z^{(1-\gamma)/(\gamma+\phi)}\) from (3.6), indirect utility as a
+function of \(Z=e^z\) is
+\[V(Z)=\frac{Z^{k}}{1-\gamma}-\frac{Z^{k}}{1+\phi}=\frac{Z^k}{k},\qquad k\equiv\frac{(1-\gamma)(1+\phi)}{\gamma+\phi}=-\Gamma ,\]
+since
+\(\frac1{1-\gamma}-\frac1{1+\phi}=\frac{\gamma+\phi}{(1-\gamma)(1+\phi)}\).
+With \(z\) Gaussian,
+\(\mathbb{E}V=\frac1k\exp(k\mathbb{E}z+\tfrac12k^2\mathbb{V}z)\). For
+\(\gamma>1\), \(k<0\) and \(1/k<0\), so maximizing \(\mathbb{E}V\) is
+minimizing \(k\mathbb{E}z+\tfrac12k^2\mathbb{V}z\), i.e.~(dividing by
+\(k<0\)) maximizing
+\[\mathcal{W}(\Omega)=\mathbb{E}[z]-\tfrac12\,\Gamma\,\mathbb{V}[z]=\lambda^\top\big(\mu+a(\Omega)\big)-\tfrac12\,\Gamma\,\lambda^\top\Sigma\lambda. \tag{4.11}\]
+The same expression results for \(\gamma<1\) (then \(k>0\), \(1/k>0\),
+and \(\Gamma<0\): the planner rewards variance) and for \(\gamma=1\) by
+the log limit (\(\Gamma=0\)). This is KMNT's planner objective with
+\(\rho_{KMNT}-1\) replaced by \(\Gamma\); as \(\phi\to\infty\),
+\(\Gamma\to\gamma-1\). KMNT Prop. 1 shows the fixed point of
+(4.7)--(4.8) is the maximizer of (4.11); the proof is unchanged by the
+substitution, and the derivation in 4.1--4.2 verifies its key step ---
+that producers discount with weight \(\Gamma\) --- directly from the
+decentralized problem.
+
+\subsubsection{4.6 Comparative statics
+(inherited)}\label{comparative-statics-inherited}
+
+Everything in KMNT Sections 5--7 applies with \(\rho-1\to\Gamma\): Prop.
+2 (own Domar weight falls in own variance), Prop. 3
+(\(d\lambda/d\gamma=-H^{-1}\partial\mathcal{E}/\partial\gamma\) for any
+belief parameter \(\gamma\in\{\mu_i,\Sigma_{ij}\}\), with
+\(\mathcal{E}\equiv\mu-\Gamma\Sigma\lambda\)), Cor. 3 (sign of
+cross-effects given by global complementarity), and Lemma 9 (with
+\(H_i=-\bar\kappa\hat H_i\),
+\(\Omega_i^*=\Omega_i^\circ+\bar\kappa^{-1}(\hat H_i^\circ)^{-1}R^\circ+O(\bar\kappa^{-2})\)).
+
+\subsection{5. The sticky-price block}\label{the-sticky-price-block}
+
+From here on all variables are log-deviations from the regime's steady
+state (N2), so \(\log A_t\equiv\varepsilon_t-\mu\) with
+\(\log A_{0t}=0\), and \(a_i(\Omega_i^*)\) is absorbed into the steady
+state. \(\Omega\equiv\Omega^*\), \(L\equiv(I-\Omega^*)^{-1}\),
+\(\lambda\equiv\lambda^*\) throughout.
+
+\subsubsection{5.1 From the Calvo problem to the sectoral Phillips
+curve}\label{from-the-calvo-problem-to-the-sectoral-phillips-curve}
+
+\textbf{Reset price.} Write
+\(x_{t,t+s}\equiv\Lambda_{t,t+s}P_{i,t+s}^{\theta}Y_{i,t+s}\) for the
+weight in (2.6). In the zero-inflation steady state \(P^*=P=MC\) and
+\(x_{t,t+s}=\rho^s\bar x\). Because the bracket
+\([P^*_{it}-MC_{i,t+s}]\) is zero in steady state, first-order
+deviations of \(x_{t,t+s}\) multiply zero and drop out; only the
+bracket's own deviation survives. Dividing (2.6) by \(\bar x\bar P\),
+\[\sum_{s=0}^\infty(1-\delta_i)^s\rho^s\,\mathbb{E}_t\big[p^*_{it}-mc_{i,t+s}\big]=0\;\Longrightarrow\;p^*_{it}=\big(1-\rho(1-\delta_i)\big)\sum_{s=0}^\infty\big(\rho(1-\delta_i)\big)^s\mathbb{E}_t\,mc_{i,t+s}, \tag{5.1}\]
+using \(\sum_s(\rho(1-\delta_i))^s=1/(1-\rho(1-\delta_i))\).
+Equivalently, splitting off \(s=0\),
+\[p^*_{it}=\big(1-\rho(1-\delta_i)\big)mc_{it}+\rho(1-\delta_i)\,\mathbb{E}_tp^*_{i,t+1}. \tag{5.2}\]
+
+\textbf{Price index.} Log-linearizing (2.7):
+\((1-\theta)p_{it}=(1-\delta_i)(1-\theta)p_{i,t-1}+\delta_i(1-\theta)p^*_{it}\),
+so
+\[p_{it}=(1-\delta_i)p_{i,t-1}+\delta_ip^*_{it}\quad\Longleftrightarrow\quad\pi_{it}=\delta_i\big(p^*_{it}-p_{i,t-1}\big). \tag{5.3}\]
+
+\textbf{Combining.} Subtract \(p_{i,t-1}\) from both sides of (5.2):
+\[p^*_{it}-p_{i,t-1}=\big(1-\rho(1-\delta_i)\big)\big(mc_{it}-p_{i,t-1}\big)+\rho(1-\delta_i)\big(\mathbb{E}_tp^*_{i,t+1}-p_{i,t-1}\big).\]
+Use \(mc_{it}-p_{i,t-1}=(mc_{it}-p_{it})+\pi_{it}\) and, from (5.3)
+shifted forward,
+\(\mathbb{E}_tp^*_{i,t+1}-p_{i,t-1}=(\mathbb{E}_tp^*_{i,t+1}-p_{it})+\pi_{it}=\mathbb{E}_t\pi_{i,t+1}/\delta_i+\pi_{it}\).
+Then multiply through by \(\delta_i\) and use (5.3) on the left:
+\[\pi_{it}=\delta_i\big(1-\rho(1-\delta_i)\big)\big(mc_{it}-p_{it}\big)+\delta_i\big[(1-\rho(1-\delta_i))+\rho(1-\delta_i)\big]\pi_{it}+\rho(1-\delta_i)\mathbb{E}_t\pi_{i,t+1}.\]
+The middle bracket equals \(1\), so
+\(\pi_{it}(1-\delta_i)=\delta_i(1-\rho(1-\delta_i))(mc_{it}-p_{it})+\rho(1-\delta_i)\mathbb{E}_t\pi_{i,t+1}\).
+Dividing by \(1-\delta_i\):
+\[\boxed{\;\pi_{it}=\rho\,\mathbb{E}_t\pi_{i,t+1}+\kappa_i\big(mc_{it}-p_{it}\big),\qquad\kappa_i\equiv\frac{\delta_i\big(1-\rho(1-\delta_i)\big)}{1-\delta_i}\;} \tag{5.4}\]
+This holds for every sector \(i\in\{0,\dots,N\}\), with \(mc_{0t}\)
+given by (2.8). In matrix form,
+\(K\equiv\mathrm{diag}(\kappa_0,\dots,\kappa_N)\):
+\[\pi_t=\rho\,\mathbb{E}_t\pi_{t+1}+K\big(mc_t-p_t\big). \tag{5.5}\]
+
+\subsubsection{5.2 Marginal-cost gaps in terms of prices, productivity
+and the output
+gap}\label{marginal-cost-gaps-in-terms-of-prices-productivity-and-the-output-gap}
+
+Stack (2.5) for \(i\ge1\) and (2.8) for \(i=0\):
+\[mc_t=\Omega p_t+\alpha\,w^h_t-\log A_t,\qquad w^h_t=p^C_t+\gamma c_t+\phi l_t . \tag{5.6}\]
+Three first-order facts convert \(w^h_t\) into observables. (a)
+Goods-market clearing with no investment: \(c_t=y_t\). (b) Definition of
+the gap: \(y_t=y^{nat}_t+\tilde y_t\). (c) \emph{Output gap equals hours
+gap}: aggregate output is
+\(y_t=\lambda^\top\log A_t+l_t+O(\|\cdot\|^2)\) under sticky prices as
+well as flexible ones, because the steady state is efficient (M2) and by
+the envelope theorem the misallocation of inputs across sectors caused
+by relative-price distortions has no first-order effect on aggregate
+output (R23 Remark 5). Subtracting the natural counterpart,
+\(\tilde y_t=\tilde l_t\). Therefore
+\[\gamma c_t+\phi l_t=\gamma\big(y^{nat}_t+\tilde y_t\big)+\phi\big(l^{nat}_t+\tilde y_t\big)=\frac{\gamma(1+\phi)+\phi(1-\gamma)}{\gamma+\phi}\lambda^\top\log A_t+(\gamma+\phi)\tilde y_t=\lambda^\top\log A_t+(\gamma+\phi)\tilde y_t ,\]
+using (3.6) and \(\gamma(1+\phi)+\phi(1-\gamma)=\gamma+\phi\). So
+\[w^h_t=\beta^\top p_t+\lambda^\top\log A_t+(\gamma+\phi)\tilde y_t . \tag{5.7}\]
+The natural real wage rises one-for-one with aggregate TFP; the gap adds
+\((\gamma+\phi)\tilde y_t\). Substituting (5.7) into (5.6) and
+subtracting \(p_t\):
+\[mc_t-p_t=-\big[(I-\Omega)-\alpha\beta^\top\big]p_t-\big[I-\alpha\lambda^\top\big]\log A_t+\alpha(\gamma+\phi)\tilde y_t . \tag{5.8}\]
+Two identities collapse the two brackets into one operator. From
+\((I-\Omega)\mathbf{1}=\alpha\):
+\[(I-\Omega)-\alpha\beta^\top=(I-\Omega)\big(I-\mathbf{1}\beta^\top\big)\equiv Q ,\]
+and from \(\lambda^\top=\beta^\top L\), \((I-\Omega)L=I\):
+\[I-\alpha\lambda^\top=(I-\Omega)L-(I-\Omega)\mathbf{1}\beta^\top L=(I-\Omega)\big(I-\mathbf{1}\beta^\top\big)L=QL .\]
+Hence
+\[\boxed{\;mc_t-p_t=-\,Q\big(p_t+L\log A_t\big)+\alpha(\gamma+\phi)\tilde y_t\;} \tag{5.9}\]
+Interpretation. By (3.2) the natural price vector is
+\(p^{nat}_t=\mathbf{1}w_t-L\log A_t\), and
+\(Q\mathbf{1}=(I-\Omega)(\mathbf{1}-\mathbf{1})=0\), so
+\(Q(p_t+L\log A_t)=Q(p_t-p^{nat}_t)\): the marginal-cost gap of sector
+\(i\) is minus the gap between actual and natural \emph{relative}
+prices, weighted by \(i\)'s input shares, plus (for the union only) the
+labor-cost gap \((\gamma+\phi)\tilde y_t\). Following R23, define the
+state
+\[\chi_t\equiv p_{t-1}+L\log A_t,\qquad p_t+L\log A_t=\chi_t+\pi_t . \tag{5.10}\]
+
+\subsubsection{5.3 The sectoral Phillips-curve system and its map to
+R23}\label{the-sectoral-phillips-curve-system-and-its-map-to-r23}
+
+Substitute (5.9)--(5.10) into (5.5):
+\[\pi_t=\rho\,\mathbb{E}_t\pi_{t+1}+K\alpha(\gamma+\phi)\tilde y_t-KQ\big(\chi_t+\pi_t\big)\;\Longrightarrow\;(I+KQ)\pi_t=\rho\,\mathbb{E}_t\pi_{t+1}+K\alpha(\gamma+\phi)\tilde y_t-KQ\chi_t .\]
+Let \(M\equiv(I+KQ)^{-1}\) and define
+\[V\equiv MKQ=I-M,\qquad B\equiv MK\alpha . \tag{5.11}\] (\(V=I-M\)
+because \(I-(I+KQ)^{-1}=(I+KQ)^{-1}(I+KQ-I)=(I+KQ)^{-1}KQ\).) Then
+\[\boxed{\;\pi_t=\rho\,(I-V)\,\mathbb{E}_t\pi_{t+1}+B(\gamma+\phi)\tilde y_t-V\chi_t,\qquad p_t=p_{t-1}+\pi_t\;} \tag{5.12}\]
+This is R23 Proposition 2. The state vector is \((p_{t-1},\log A_t)\)
+with \(\log A_t=\eta\log A_{t-1}+\xi_t\).
+
+\textbf{Map to R23's rigidity matrix.} R23 writes \(V\) and \(B\) in
+terms of \(\Delta=\mathrm{diag}(\hat\delta_i)\). Define
+\(\hat\delta_i\equiv\kappa_i/(1+\kappa_i)\), so
+\(K=\Delta(I-\Delta)^{-1}\). Explicitly,
+\[\hat\delta_i=\frac{\delta_i(1-\rho(1-\delta_i))}{(1-\delta_i)+\delta_i(1-\rho(1-\delta_i))}=\frac{\delta_i\big(1-\rho(1-\delta_i)\big)}{1-\rho\,\delta_i(1-\delta_i)}, \tag{5.13}\]
+which is R23's \(\hat\delta_i(\delta_i,\rho)\);
+\(\hat\delta_i\in(0,1)\), \(\hat\delta_i\to1\) as \(\delta_i\to1\) and
+\(\hat\delta_i\to0\) as \(\delta_i\to0\). Now
+\[I+KQ=(I-\Delta)^{-1}\big[(I-\Delta)+\Delta Q\big]=(I-\Delta)^{-1}\big[I-\Delta+\Delta(I-\Omega)-\Delta\alpha\beta^\top\big]=(I-\Delta)^{-1}\big[I-\Delta\Omega-\Delta\alpha\beta^\top\big],\]
+so \(M=\big[I-\Delta\Omega-\Delta\alpha\beta^\top\big]^{-1}(I-\Delta)\).
+Apply the Sherman--Morrison identity
+\([G-uv^\top]^{-1}=G^{-1}+G^{-1}uv^\top G^{-1}/(1-v^\top G^{-1}u)\) with
+\(G=I-\Delta\Omega\), \(u=\Delta\alpha\), \(v=\beta\), and define
+\[\delta^{\beta}\equiv\beta^\top(I-\Delta\Omega)^{-1}\Delta\ \ (\text{row vector}),\qquad\delta^{\beta}\alpha\equiv\beta^\top(I-\Delta\Omega)^{-1}\Delta\alpha\ \ (\text{scalar}),\qquad B\equiv\frac{(I-\Delta\Omega)^{-1}\Delta\alpha}{1-\delta^{\beta}\alpha}. \tag{5.14}\]
+Then
+\([I-\Delta\Omega-\Delta\alpha\beta^\top]^{-1}=(I-\Delta\Omega)^{-1}+B\beta^\top(I-\Delta\Omega)^{-1}\),
+and:
+
+\emph{The gap coefficient.}
+\(MK\alpha=[I-\Delta\Omega-\Delta\alpha\beta^\top]^{-1}(I-\Delta)\Delta(I-\Delta)^{-1}\alpha=[(I-\Delta\Omega)^{-1}+B\beta^\top(I-\Delta\Omega)^{-1}]\Delta\alpha=(I-\Delta\Omega)^{-1}\Delta\alpha\Big(1+\frac{\delta^\beta\alpha}{1-\delta^\beta\alpha}\Big)=B\),
+confirming that the \(B\) of (5.11) is the \(B\) of (5.14).
+
+\emph{The cost-push matrix.}
+\(V=MKQ=[(I-\Delta\Omega)^{-1}+B\beta^\top(I-\Delta\Omega)^{-1}]\Delta\big[(I-\Omega)-\alpha\beta^\top\big]\).
+Expanding the four products,
+\[V=(I-\Delta\Omega)^{-1}\Delta(I-\Omega)-(I-\Delta\Omega)^{-1}\Delta\alpha\,\beta^\top+B\,\delta^\beta(I-\Omega)-B\,(\delta^\beta\alpha)\,\beta^\top .\]
+The second term is \(-B(1-\delta^\beta\alpha)\beta^\top\) by (5.14);
+adding the fourth gives \(-B\beta^\top=-B\lambda^\top(I-\Omega)\) since
+\(\beta^\top=\lambda^\top(I-\Omega)\). Therefore
+\[V=\Big[(I-\Delta\Omega)^{-1}\Delta-B\big(\lambda^\top-\delta^\beta\big)\Big](I-\Omega), \tag{5.15}\]
+which is R23's expression. The operator \((I-\Delta\Omega)^{-1}\Delta\)
+is the rigidity-discounted Leontief inverse: entry \((i,j)\) sums over
+all supply-chain paths from \(i\) back to \(j\), each step discounted by
+the reset probability of the sector at that step.
+
+\subsubsection{5.4 Closing the output gap
+(G1)}\label{closing-the-output-gap-g1}
+
+Under G1 the gap term in (5.12) is identically zero:
+\[\pi_t=\rho\,(I-V)\,\mathbb{E}_t\pi_{t+1}-V\chi_t . \tag{5.16}\] R23
+Lemma 4 establishes that, with \(\delta_i<1\) for all \(i\) (N1) and
+AR(1) productivity (E3), (5.16) together with (5.10) has a unique
+bounded solution, and that it is implemented by a Taylor rule on the
+divine-coincidence index. All network effects on inflation under G1 run
+through \(V\) and \(\chi_t\); the slope \(B\) is switched off by
+construction.
+
+\subsubsection{5.5 Inflation indices, slopes and cost-push
+residuals}\label{inflation-indices-slopes-and-cost-push-residuals}
+
+For any weight vector \(\varphi\) with \(\varphi^\top\mathbf{1}=1\),
+define \(\pi^{\varphi}_t\equiv\varphi^\top\pi_t\) and
+\(\delta^{\varphi}\equiv\varphi^\top(I-\Delta\Omega)^{-1}\Delta\).
+Pre-multiplying (5.12) by \(\varphi^\top\):
+\[\pi^{\varphi}_t=\rho\,\varphi^\top(I-V)\mathbb{E}_t\pi_{t+1}+\kappa^{\varphi}(\gamma+\phi)\tilde y_t+u^{\varphi}_t , \tag{5.17}\]
+with
+\[\kappa^{\varphi}\equiv\varphi^\top B=\frac{\delta^{\varphi}\alpha}{1-\delta^{\beta}\alpha},\qquad u^{\varphi}_t\equiv-\varphi^\top V\chi_t=\Big[\kappa^{\varphi}\big(\lambda^\top-\delta^{\beta}\big)-\delta^{\varphi}\Big](I-\Omega)\chi_t , \tag{5.18}\]
+the second by pre-multiplying (5.15) by \(-\varphi^\top\). This is R23
+Corollary 2. The expectation term is not proportional to
+\(\mathbb{E}_t\pi^\varphi_{t+1}\) in general, so (5.17) is not a closed
+aggregate Phillips curve.
+
+For the CPI (\(\varphi=\beta\)),
+\(\kappa^C=\delta^\beta\alpha/(1-\delta^\beta\alpha)\) and the bracket
+in (5.18) simplifies:
+\[\frac{\delta^\beta\alpha(\lambda^\top-\delta^\beta)}{1-\delta^\beta\alpha}-\delta^\beta=\frac{\delta^\beta\alpha\,\lambda^\top-\delta^\beta\alpha\,\delta^\beta-\delta^\beta+\delta^\beta\alpha\,\delta^\beta}{1-\delta^\beta\alpha}=\frac{\delta^\beta\alpha\,\lambda^\top-\delta^\beta}{1-\delta^\beta\alpha},\]
+so
+\[u^C_t=\frac{\delta^{\beta}\alpha\,\lambda^\top-\delta^{\beta}}{1-\delta^{\beta}\alpha}\,(I-\Omega)\chi_t . \tag{5.19}\]
+On impact of a shock with \(p_{t-1}=0\), \((I-\Omega)\chi_t=\log A_t\),
+so \(u^C_t=v^C\log A_t\) with the \textbf{exposure vector}
+\[v^C\equiv\frac{\delta^{\beta}\alpha\,\lambda^\top-\delta^{\beta}}{1-\delta^{\beta}\alpha}. \tag{5.20}\]
+Entry \(j\) is the impact cost-push in CPI from a unit productivity
+shock in \(j\): the wage channel \(\delta^\beta\alpha\,\lambda_j\)
+(wages fall with aggregate TFP, discounted by wage and price rigidity
+along every path) minus the direct channel \(\delta^\beta_j\) (the
+rigidity-discounted exposure of consumption to \(j\)'s price), scaled by
+the wage--price multiplier \(1/(1-\delta^\beta\alpha)\). Under G1,
+\(\pi^C_t=\rho\beta^\top(I-V)\mathbb{E}_t\pi_{t+1}+u^C_t\): the whole
+CPI response is the cost-push term and its expected continuation.
+
+\subsubsection{5.6 The IS curve (needed only when G1 is
+relaxed)}\label{the-is-curve-needed-only-when-g1-is-relaxed}
+
+Log-linearizing (2.3) with \(c_t=y_t\):
+\(y_t=\mathbb{E}_ty_{t+1}-\frac1\gamma\big(i_t-\mathbb{E}_t\pi^C_{t+1}+\log\rho\big)\).
+Subtracting the natural counterpart and defining the natural rate
+\(r^n_t\equiv-\log\rho+\gamma\,\mathbb{E}_t\big(y^{nat}_{t+1}-y^{nat}_t\big)\),
+\[\tilde y_t=\mathbb{E}_t\tilde y_{t+1}-\frac1\gamma\big(i_t-\mathbb{E}_t\pi^C_{t+1}-r^n_t\big),\qquad r^n_t=-\log\rho+\gamma(\eta-1)\frac{1+\phi}{\gamma+\phi}\lambda^\top\log A_t . \tag{5.21}\]
+Note that \(r^n_t\) loads on \(\log A_t\) through \(\lambda=\lambda^*\):
+a regime change moves the natural rate's sensitivity to every sectoral
+shock, a third channel (beyond exposure and slope) through which the
+network affects dynamics once the gap is not closed.
+
+\clearpage
+\subsection{6. (Main) Issues}\label{consistency-checks-issues-mapped-to-assumptions}
+\begin{itemize}
+    \item \textbf{Frequency separation: producers evaluate the technique choice problem at flex-price objects that they do not face in reality.} This assumption guarantees a closed form and allows most of the network-block theorems to hold as in KMNT paper. However, this omits a channel of technique choice: producers are pushed toward sticky-price
+suppliers. Under M4 price stickiness is the same between foreign and domestic, so this issue does not affect reshoring/delocalization decisions.
+    \item \textbf{Foreign producers buy labor from the labor union just as all the other domestic sectors.} This keeps the input-output matrix invertible and thus guarantees the existence of the Leontief inverse. Need a way to incorporate imperfect labor mobility. Can changing the model of wage rigidity (dropping union sector in $\Omega_i$) be a solution?
+\end{itemize}
+
+
+
+
+
+
+
+
+\clearpage
+Each item states the issue, the assumption(s) responsible, and the
+resolution or the flag to carry.
+
+\textbf{1. The inflationary sign of a foreign supply shock depends on
+wage rigidity, not on the network.} From (5.20), in the one-sector
+economy (union \(0\), final good \(C\), \(\Omega_{C0}=1\)) one finds
+\(v^C_C=-\hat\delta_C(1-\hat\delta_L)/(1-\hat\delta_C\hat\delta_L)\): a
+negative productivity shock raises CPI cost-push only if
+\(\hat\delta_L<1\). With flexible wages (\(\hat\delta_L=1\)) the
+residual is zero --- the divine coincidence --- and in multi-sector
+economies with flexible wages an upstream negative shock is
+\emph{deflationary} (R23 Example 2). \emph{Source:} N1 with
+\(\delta_L<1\). \emph{Status:} intended; N1 must not be relaxed to
+flexible wages. \textcolor{blue}{We know this from macro 101. In the single sector economy without wage rigidity we have divine coincidence}
+
+\textbf{2. The technique choice of a monopolistic producer has a
+second-order condition that KMNT's price-taker does not.} Equation
+(4.9): \(H_i+(\theta-1)\Sigma_p\prec0\) on the simplex tangent space. A
+CES monopolist's profit is convex in own cost (4.1), so it values cost
+variance with weight \(\theta-1\); if the TFP shifter is not curved
+enough the producer prefers a corner technique to gamble on cost.
+\emph{Source:} M1 (CES, monopolistic competition, needed for Calvo)
+combined with T2 (finite curvature \(H_i\)). \emph{Resolution:} impose
+\(\bar\kappa\) large (A5 of the design document), which makes \(-H_i\)
+dominate; verify (4.9) numerically at the calibrated \(\Sigma_p\). The
+first-order condition (4.7) is unaffected, so all KMNT comparative
+statics still apply. \textcolor{blue}{Mention to MW because it is a difference compared to the KMNT paper. The assumption of large $\bar \kappa$ makes sense and is used in KMNT, as well.}
+
+\textbf{3. Risk aversion $\gamma$ in the network block requires \(\gamma>1\),
+which makes hours countercyclical to productivity.} \(\Gamma>0\) iff
+\(\gamma>1\) (P3); then (3.6) gives
+\(l^{nat}=\frac{1-\gamma}{\gamma+\phi}z<0\) for \(z>0\). \emph{Source:}
+P1, P3, E1 (no capital to absorb the income effect). \emph{Status:} a
+known property of the textbook NK model with \(\gamma>1\); acceptable
+for the questions asked, but note that the same parameter drives both
+the flight-to-safety motive and the hours response. \textcolor{blue}{Also this assumption of $\gamma > 1$ makes sense and is used in KMNT, as well. See footnote 10 in paper w/ supplement.}
+
+\textbf{4. Frequency separation evaluates the technique at flex-price
+objects that the producer does not actually face.} Under G1,
+\(c_t=c^{nat}_t\) to first order, so \(\tilde\lambda\) in (4.4) is
+correct to first order; but sectoral prices and quantities deviate from
+their natural values at first order, and a Calvo producer stuck at an
+old price bears input-cost variance directly in its markup --- a hedging
+motive that (4.7) omits. \emph{Source:} I2. \emph{Status:} the
+approximation error is small when shocks are persistent or the sourcing
+horizon is long (variance-ratio calculation in the design discussion);
+the omitted motive would push producers \emph{toward} sticky-price
+suppliers, which under M4 is neutral between foreign and domestic. Flag
+as extension. \textcolor{red}{MAIN DISCUSSION POINT WITH MW.}
+
+\textbf{5. Techniques use unconditional moments although the current
+\(\varepsilon_0\) may be known.} (4.3) replaced
+\(\sum_t\rho^t\mathbb{E}[\cdot]\) by a single unconditional expectation.
+With AR(1) shocks (E3) the conditional distribution at the start of the
+regime differs from the unconditional one. \emph{Source:} I1.
+\emph{Resolution:} interpret the choice as made behind the veil, or as
+the average over the regime's stationary distribution; either is exact
+if the regime is long relative to \(1/(1-\eta)\).
+
+\textbf{6. A regime change moves the linearization point.} N2 linearizes
+around the steady state of the regime, which has network
+\(\Omega^*(\mu,\Sigma)\) and TFP levels \(\mu+a(\Omega^*)\). After a
+fragmentation shock, \(\Omega^*\) changes discretely, and inherited
+prices \(p_{t-1}\) were set under the old steady state. Computing the
+transition with the new \((\Omega^*,V)\) and
+\(\chi_t=p_{t-1}+L\log A_t\) treats the difference between old and new
+natural prices as a one-off shock, which is valid to first order only if
+\(\Delta\Omega\) is small. \emph{Source:} N2, E4, T3. \emph{Resolution:}
+keep \(\bar\kappa\) large (then \(\Delta\Omega=O(\bar\kappa^{-1})\),
+KMNT Lemma 9); otherwise compute the transition numerically as a change
+of steady state.
+
+\textbf{7. Ex-post shares are constant, so there is no price-induced
+reallocation.} Under T1 a permanent rise in a foreign price does not
+change \(\Omega_{if}\) ex post; all network movement is ex ante through
+\(R\). \emph{Source:} T1 (needed for exact log-linearity of prices and
+for (4.5) to be Gaussian). \emph{Status:} a substantive restriction,
+stated openly; the robustness check is a CES nest between \(F\) and
+\(D\) in the ex-post technology, which leaves (5.12) unchanged to first
+order (cost shares are sufficient statistics by Shephard's lemma) but
+adds a direct price elasticity to \(\Omega\). \textcolor{blue}{Yes. A realized rise in a foreign price within a regime, however persistent, leaves \(\Omega\) unchanged; \(\Omega\) moves only when beliefs \((\mu, \Sigma)\) change. But my model is all about beliefs. I don't really care about within-regime network adjustment.}
+
+\textbf{8. The log-normal mean effect.} A rise in \(\Sigma_{ii}\) raises
+\(\mathbb{E}[e^{\varepsilon_i}]\) by \(\tfrac12\Sigma_{ii}\); the
+objective (4.11) is in logs and does not see this, but level comparisons
+of GDP across regimes would. \emph{Source:} E3. \emph{Status:} KMNT App.
+H; ignore in the baseline and say so.
+
+\textbf{9. Correction to an earlier claim: the fully flexible limit is
+\(0/0\), not zero.} As \(\Delta\to I\), \(\delta^\beta\to\lambda^\top\)
+and \(\delta^\beta\alpha\to1\), so both numerator and denominator of
+(5.20) vanish. The limit depends on the direction of approach: with
+\(\hat\delta_L=1\) and any \(\hat\delta_C\) in the one-sector economy,
+\(v^C_C=0\); with uniform \(\hat\delta_i=1-\epsilon\), \(\epsilon\to0\),
+\(v^C_C\to-\tfrac12\) --- a TFP shock is split evenly between price and
+wage adjustment however small the rigidity, because what matters is
+\emph{relative} stickiness. The statement in
+\texttt{model\_foundations.md} §7.2 that ``\(v^C\equiv0\) under fully
+flexible prices'' is wrong and should read: the CPI residual vanishes
+when wages are flexible and there is a single final sector (divine
+coincidence); in general it depends on the ratio of wage to price
+rigidity even in the flexible limit. \emph{Source:} N1. \emph{Status:}
+corrected below in the design document.
+
+\textbf{10. Sectors with \(\delta_i=1\) make \(\kappa_i\) infinite.}
+(5.4) degenerates to \(mc_{it}=p_{it}\), and \(K\) in (5.5) is
+unbounded; R23's invertibility caveat for \(I-V\) is the same fact.
+\emph{Source:} N1. \emph{Status:} non-binding under M4
+(\(\delta_F=\delta_D<1\)); in the commodity variant, substitute the
+static condition for that sector rather than using \(\kappa_i\).
+
+\textbf{11. The union's Phillips curve has the standard slope only
+because of pooling.} Without P4, each labor type's marginal rate of
+substitution depends on its own hours, which depend on its relative
+wage, and the wage Phillips curve slope is \(\kappa_0/(1+\theta\phi)\)
+(Erceg--Henderson--Levin). \emph{Source:} P4. \emph{Status:} intended
+simplification; the union is ``just a sector'' only under P4. \textcolor{blue}{GTK, but the assumption is standard in the literature(?)}
+
+\textbf{12. Subsidy financing and profits under sticky prices.} In the
+flex economy the subsidy equals aggregate profit and \(P^CC=WL\) exactly
+(3.4). Under sticky prices profits differ from the subsidy at first
+order, but the difference is a lump-sum transfer to a Ricardian
+household and does not affect first-order allocations. \emph{Source:}
+M2, E1 (no distortionary taxes). \emph{Status:} fine.
+
+\textbf{13. \(y_t=c_t\) and \(\tilde y_t=\tilde l_t\) are first-order
+statements under sticky prices.} Price dispersion within sectors and
+relative-price misallocation across sectors are second order at an
+efficient steady state. \emph{Source:} N2, M2. \emph{Status:} fine;
+would fail if the steady state were distorted (no subsidy), in which
+case first-order terms from misallocation appear and R23's welfare block
+would be needed.
+
+\textbf{14. Closing the gap requires the central bank to know
+\(\lambda^*\).} After a regime change
+\(y^{nat}_t=\frac{1+\phi}{\gamma+\phi}\lambda^{*\top}\log A_t\) loads on
+shocks through the new Domar weights; a bank using the old \(\lambda\)
+would misjudge the natural level. \emph{Source:} I3, G1. \emph{Status:}
+assumed; an informational-friction extension is possible but off the
+main line.
+
+\textbf{15. Foreign sectors buy domestic labor services.} Under M4 a
+foreign supplier's marginal cost (2.5) contains the domestic wage
+\(p_{0t}\), so domestic wage shocks transmit into ``foreign'' prices and
+foreign productivity shocks feed back into domestic labor demand exactly
+as domestic ones do. This is unrealistic for imports. \emph{Source:} M4
+(the price of keeping \(L\alpha=\mathbf{1}\) and R23's lemmas intact).
+\emph{Status:} the open-economy extension replaces the foreign sector's
+labor input with an exogenous factor; until then, ``foreign'' means
+``risky and productive'', not ``abroad''.
+
+\textbf{16. Efficiency of foreign sourcing is parameterized twice.} A
+foreign input can be attractive through a high \(\mu_f\) (cheap) or a
+high ideal share \(\Omega^\circ_{if}\) (technologically preferred). Both
+enter \(R\) and \(\Omega^*\) but only \(\mu_f\) interacts with risk
+through \(\mathcal{E}=\mu-\Gamma\Sigma\lambda\). \emph{Source:} T2, E3.
+\emph{Status:} choose one as the ``efficiency side'' of the trade-off
+and hold the other fixed, to keep comparative statics interpretable.
+
+\textbf{17. \(\hat\delta_i\) is not the Calvo reset probability.} By
+(5.13) a quarterly reset probability \(\delta_i=0.25\) implies
+\(\hat\delta_i\approx0.08\), and \(\hat\delta_i=0.25\) corresponds to
+\(\delta_i\approx0.44\). The illustrative calibrations used earlier in
+this project were stated in \(\hat\delta\) units. \emph{Source:} N1.
+\emph{Status:} calibrate \(\delta_i\) from price-duration data and
+convert with (5.13); do not set \(\hat\delta\) directly.
+
+\textbf{18. Atomistic technique choice is consistent with one technique
+per sector.} In (4.3) the producer takes \(\lambda_i,P_i,Y_i\) as given;
+its own \(\Omega_{if}\) does not move them because it has measure zero
+(M1). Symmetry then delivers T3. No issue, but T3 is a consequence of M1
+plus the uniqueness of the maximizer (which is where (4.9) matters), not
+an independent assumption.
+
+\clearpage
+\subsection{7. Notation dictionary}\label{notation-dictionary}
+
+Column ``R23'' gives Rubbo (2023)'s symbol for the same object; ``KMNT''
+gives Kopytov et al.~(2024)'s. A dash means the object does not appear
+in that paper. Where the meaning differs slightly the difference is
+noted.
+
+\subsubsection{Indices, time, sectors}\label{indices-time-sectors}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R23
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+KMNT
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(t\) & period (quarter) & \(t\) & --- (static) \\
+\(i,j,k\in\{0,\dots,N\}\) & sectors; \(0\) = union & \(i,j\); union =
+``sector \(I\)'' in Remark 4 & \(i,j\in\{1,\dots,n\}\); labor is not a
+sector \\
+\(f\in[0,1]\) & producer / variety within a sector & \(f\) & ---
+(representative firm) \\
+\(N\) & number of goods sectors & \(N\) & \(n\) \\
+\end{longtable}
+
+\subsubsection{Household}\label{household-1}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R23
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+KMNT
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(C_t,C_{it}\) & consumption aggregate, of good \(i\) & \(C_t,C_{it}\) &
+\(C,C_i\) \\
+\(L_t\) & raw hours supplied & \(L_t\) & \(L=1\) (inelastic) \\
+\(B_t,i_t\) & nominal bond, nominal rate & \(B_t,i_t\) & --- \\
+\(\rho,\gamma,\phi\) & discount factor, risk aversion, inverse Frisch &
+\(\rho,\gamma,\phi\) & \(\rho\) is risk aversion; no discounting;
+\(\phi=\infty\) \\
+\(\beta\) & consumption shares & \(\beta\) & \(\beta\) \\
+\(P^C_t,p^C_t\) & CPI, log CPI & \(P^C_t\) & \(P\) (consumption price
+index) \\
+\(W^h_t,w^h_t\) & price of raw hours = nominal MRS & marginal cost of
+the union sector & --- \\
+\(\Lambda_t,\Lambda_{t,t+s}\) & nominal state price / SDF & \(\Lambda\)
+& \(\Lambda\) \\
+\(\tilde\lambda\) & log effective discount weight
+\((1-\gamma)c^{nat}=-\Gamma z\) & --- &
+\(\lambda\equiv\log\Lambda=(\rho-1)\beta^\top p\) \\
+\(\Pi_t,T_t\) & profits, lump-sum tax & \(\Pi_t,T_t\) & --- \\
+\end{longtable}
+
+\subsubsection{Technology and
+productivity}\label{technology-and-productivity}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R23
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+KMNT
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(Y_{ift},Y_{it}\) & output of producer \(f\), of sector \(i\) &
+\(Y_{ift},Y_{it}\) & \(Q_i\) \\
+\(X_{ifjt}\) & input \(j\) used by producer \(f\) in \(i\); \(j=0\) is
+labor services & \(X_{ifjt}\); labor \(L_{ift}\) & \(X_{ij}\); labor
+\(L_i\) \\
+\(\Omega\), \(\Omega_i\), \(\Omega_{ij}\) & input-output matrix
+(incl.~labor column \(0\)), technique of \(i\), share & \(\Omega\)
+(goods only), \(\alpha\) = labor shares & \(\alpha\), \(\alpha_i\),
+\(\alpha_{ij}\); labor share \(1-\sum_j\alpha_{ij}\) \\
+\(\alpha\equiv e_0\) & direct-labor-share vector (only the union) &
+\(\alpha\) (general) & --- \\
+\(\Omega^\circ_i\) & ideal technique & --- & \(\alpha^\circ_i\) \\
+\(a_i(\Omega_i)\) & log TFP shifter, \(\le0\), quadratic & --- &
+\(a_i(\alpha_i)=\log A_i(\alpha_i)\) \\
+\(H_i\), \(\hat H_i^{-1}\) & Hessian of \(a_i\), its simplex-projected
+inverse & --- & \(H_i\), \((\hat H_i^\circ)^{-1}\) \\
+\(\bar\kappa\) & scale of \(-H_i\) in the large-curvature approximation
+& --- & \(\bar\kappa\) \\
+\(\zeta_i\) & Cobb--Douglas normalization
+\(\prod_j\Omega_{ij}^{-\Omega_{ij}}\) & --- & \(\zeta(\alpha_i)\) \\
+\(\varepsilon_t,\mu,\Sigma\) & sectoral log productivity, its
+unconditional mean and covariance & --- & \(\varepsilon,\mu,\Sigma\) \\
+\(\log A_t\equiv\varepsilon_t-\mu\) & productivity deviation &
+\(\log A_t\) (with \(A=1\) in steady state) & --- \\
+\(\eta,\xi_t\) & AR(1) persistence, innovation & \(\eta_A\) & ---
+(random walk in calibration) \\
+\(A_{it}\) & exact TFP level \(e^{\varepsilon_{it}+a_i}\) & \(A_{it}\) &
+\(e^{\varepsilon_i}A_i(\alpha_i)\) \\
+\(L\equiv(I-\Omega)^{-1}\) & Leontief inverse (incl.~union) &
+\((I-\Omega)^{-1}\) & \(L(\alpha)=(I-\alpha)^{-1}\) \\
+\(\lambda^\top\equiv\beta^\top L\) & Domar weights (\(\lambda_0=1\)) &
+\(\lambda\) & \(\omega\) \\
+\(z\equiv\lambda^\top\log A\), \(Z=e^z\) & aggregate log TFP &
+\(\lambda^\top\log A_t\) & \(y\) (log GDP, since \(L=1\)) \\
+\(\Gamma\equiv\frac{(\gamma-1)(1+\phi)}{\gamma+\phi}\) &
+planner/producer risk weight & --- & \(\rho-1\) \\
+\(R\) & risk-adjusted prices
+\(\mathbb{E}p+\mathrm{Cov}[p,\tilde\lambda]\) & --- & \(R\) \\
+\(\Sigma_p\equiv L\Sigma L^\top\) & covariance of log prices & --- &
+\(L\Sigma L^\top\) \\
+\(\mathcal{E}\equiv\mu-\Gamma\Sigma\lambda\) & risk-adjusted TFP
+(comparative statics) & --- &
+\(\mathcal{E}=\mu-(\rho-1)\Sigma\omega\) \\
+\(\mathcal{W}(\Omega)\) & planner objective (4.11) & --- &
+\(\mathcal{W}\) \\
+\(\nu_i\) & multiplier on \(\mathbf{1}^\top\Omega_i=1\) & --- &
+\(\gamma_i\) (on \(\sum_j\alpha_{ij}\le\bar\alpha_i\)) \\
+\(\tau^w\) & wasteful access wedge (folded into \(\varepsilon\)) & --- &
+\(\tau\) (App. L) \\
+\end{longtable}
+
+\subsubsection{Market structure and nominal
+side}\label{market-structure-and-nominal-side}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Symbol
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Meaning
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+R23
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+KMNT
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\theta\) & within-sector CES elasticity & \(\varepsilon_i\)
+(sector-specific) & --- (perfect competition) \\
+\(\mathcal{M}=\theta/(\theta-1)\) & gross markup & \(\mu\) & --- \\
+\(\tau\) & input subsidy, \((1-\tau)\mathcal{M}=1\) & \(\tau_i\) & ---
+(App. K wedges) \\
+\(P_{ift},P_{it},p_{it}\) & variety price, sectoral index, log &
+\(P_{ift},P_{it}\) & \(P_i,p_i\) (in wage units) \\
+\(W_t\equiv P_{0t}\), \(w_t\) & wage paid by producers = union's price &
+\(W_t\) & \(W=1\) numeraire \\
+\(MC_{it},mc_{it}\) & pre-subsidy marginal cost & \(MC_{it}\) &
+\(K_i,k_i\) \\
+\(P^*_{it},p^*_{it}\) & reset price & \(P^*_{it}\) & --- \\
+\(\delta_i\) & Calvo reset probability & \(\delta_i\) & --- \\
+\(\kappa_i\) & sectoral Phillips-curve slope on \(mc-p\) & ---
+(implicit) & --- \\
+\(\hat\delta_i\), \(\Delta\) & \(\kappa_i/(1+\kappa_i)\), its diagonal
+matrix & \(\hat\delta_i(\delta_i,\rho)\), \(\Delta\) & --- \\
+\(K\) & \(\mathrm{diag}(\kappa_i)=\Delta(I-\Delta)^{-1}\) & --- & --- \\
+\(\pi_t,\pi^C_t,\pi^{\varphi}_t\) & sectoral, CPI, index inflation &
+\(\pi_t,\pi^C_t,\pi^{\varphi}_t\) & --- \\
+\(\varphi\) & inflation-index weights & \(\varphi\) & --- \\
+\(y^{nat}_t,l^{nat}_t,\tilde y_t\) & natural output, natural hours,
+output gap & \(y^{nat},l^{nat},\tilde y\) & --- \\
+\(Q\equiv(I-\Omega)(I-\mathbf{1}\beta^\top)\) & relative-price operator
+& --- (implicit) & --- \\
+\(\chi_t\equiv p_{t-1}+L\log A_t\) & Phillips-curve state & \(\chi_t\) &
+--- \\
+\(M\equiv(I+KQ)^{-1}\) & inverse pass-through matrix & --- & --- \\
+\(V\equiv MKQ=I-M\) & cost-push matrix & \(V\) & --- \\
+\(B\equiv MK\alpha\) & gap-to-inflation vector & \(B\) & --- \\
+\(\delta^\varphi\equiv\varphi^\top(I-\Delta\Omega)^{-1}\Delta\) &
+rigidity-discounted exposure of index \(\varphi\) & \(\delta^\varphi\) &
+--- \\
+\(\delta^\beta\alpha\) & wage pass-through into CPI (scalar) &
+\(\delta^\beta\alpha\) & --- \\
+\(\kappa^\varphi\) & slope of index-\(\varphi\) Phillips curve &
+\(\kappa^\varphi\) & --- \\
+\(u^\varphi_t,u^C_t\) & cost-push residual of index \(\varphi\), of CPI
+& \(u^\varphi_t,u^C_t\) & --- \\
+\(v^C\) & CPI exposure vector (5.20) & --- (implicit in eq. 25) & --- \\
+\(r^n_t\) & natural real rate & \(r^{nat}_t\) & --- \\
+\(S\equiv\Omega_{CL}+\Omega_{CF}\hat\delta_F+\Omega_{CD}\hat\delta_D\) &
+toy-economy wage pass-through (design doc §7) &
+\(\alpha_F+(1-\alpha_F)\delta_I\) in Example 3 & --- \\
+\end{longtable}
+
+\subsubsection{\texorpdfstring{Symbols deliberately \emph{not} used, to
+avoid
+clashes}{Symbols deliberately not used, to avoid clashes}}\label{symbols-deliberately-not-used-to-avoid-clashes}
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 2\tabcolsep) * \real{0.5000}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Avoided
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Reason
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(\varepsilon\) for the CES elasticity (R23) & reserved for productivity
+(KMNT); CES is \(\theta\) \\
+\(\mu\) for the markup (R23) & reserved for the mean of \(\varepsilon\)
+(KMNT); markup is \(\mathcal{M}\) \\
+\(\alpha\) for the IO matrix (KMNT) & reserved for R23's direct labor
+shares; IO matrix is \(\Omega\) \\
+\(\omega\) for Domar weights (KMNT) & R23's \(\lambda\) is used \\
+\(\lambda\) for the log SDF (KMNT) & conflicts with Domar weights; log
+SDF weight is \(\tilde\lambda\) \\
+\(\theta\) for production elasticities (R23) & not needed
+(Cobb--Douglas); reused for CES \\
+\(\gamma_i,\chi_{ik}\) for KKT multipliers (KMNT) & conflict with risk
+aversion and \(\chi_t\); multiplier is \(\nu_i\) \\
+\(\rho\) for risk aversion (KMNT) & R23's \(\rho\) (discount factor)
+kept; risk aversion is \(\gamma\) \\
+\end{longtable}
+
+\end{document}
